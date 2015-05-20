@@ -12,4 +12,5 @@ public class RatingController {
     public Authority authorities() {
         return new Authority("1", "Wei");
     }
+
 }

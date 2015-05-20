@@ -1,25 +1,66 @@
-var app = angular.module('foodHygieneApp',[]);
-app.controller('RatingCtrl', function ($scope,$http){
-
-    var url = 'http://ratings.food.gov.uk/authorities/json/?callback=JSON_CALLBACK';
-
+var app = angular.module('foodHygieneApp', []);
+app.controller('RatingCtrl', function ($scope, $http) {
+    $scope.loading = true;
     $http({
-        method: 'JSONP',
-        url: url
-    }).success(function(data, status , header, config){
-        alert('Success')
+        method: 'GET',
+        url: 'http://api.ratings.food.gov.uk/Authorities',
+        headers: {'Accept': 'application/json', 'x-api-version': '2'}
+    }).success(function (data) {
+        $scope.authorities = data.authorities;
+        $scope.loading = false;
     })
-        .error(function(data, status , header, config){
-            alert('error')
+        .error(function (data, status, header, config) {
+            $scope.errorMessage = "There is a problem retrieving data, please try again later."
+            $scope.loading = false;
         });
 
-//    $http(request).success(function(data) {
-//            $scope.authorities = data.ArrayOfWebLocalAuthorityAPI;
-//            console.log($scope.authorities.size);
-//            for(var i=0;i<$scope.authorities.size; i++){
-//                var authority = $scope.authorities[i];
-//                console.log(authority.LocalAuthorityId+"-"+authority.Name);
-//            }
-//        });
+    $scope.getRatingDistribution = function () {
+        $scope.loading = true;
+        $http({
+            method: 'GET',
+            url: 'http://api.ratings.food.gov.uk/Establishments?localAuthorityId=' + $scope.authorityId,
+            headers: {'Accept': 'application/json', 'x-api-version': '2'}
+        }).success(function (data) {
+            var establishments = data.establishments;
+            var total = establishments.length;
+            var count = [];
+            var categories = [];
+            for (var i = 0; i < total; i++) {
+                var ratingValue = establishments[i].RatingValue;
+                if (ratingValue in count) {
+                    count[ratingValue]++;
+                } else {
+                    categories.push(ratingValue);
+                    count[ratingValue] = 0;
+                }
+            }
 
+            var distributions = [];
+            for (var i = 0; i < categories.length; i++) {
+                var category = categories[i];
+                var distribution = {};
+                distribution.name = category;
+                distribution.percentage = roundNumber(count[category] / total);
+                distributions.push(distribution);
+            }
+            $scope.distributions = distributions;
+            $scope.loading = false;
+
+        })
+            .error(function (data, status, header, config) {
+                $scope.errorMessage = "There is a problem retrieving data, please try again later."
+                $scope.loading = false;
+            });
+    }
+
+    $scope.clearTable = function () {
+        $scope.distributions = undefined;
+        $scope.errorMessage = undefined;
+    }
+
+    function roundNumber(number) {
+        return Math.round(number * 10000) / 100;
+    }
 });
+
+
