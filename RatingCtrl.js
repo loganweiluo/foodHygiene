@@ -1,6 +1,7 @@
 var app = angular.module('foodHygieneApp', []);
 app.controller('RatingCtrl', function ($scope, $http) {
     $scope.loading = true;
+    $scope.authorities = undefined;
     $http({
         method: 'GET',
         url: 'http://api.ratings.food.gov.uk/Authorities',
@@ -10,7 +11,7 @@ app.controller('RatingCtrl', function ($scope, $http) {
         $scope.loading = false;
     })
         .error(function (data, status, header, config) {
-            $scope.errorMessage = "There is a problem retrieving data, please try again later."
+            $scope.showErrorMessage = true;
             $scope.loading = false;
         });
 
@@ -48,14 +49,14 @@ app.controller('RatingCtrl', function ($scope, $http) {
 
         })
             .error(function (data, status, header, config) {
-                $scope.errorMessage = "There is a problem retrieving data, please try again later."
+                $scope.showErrorMessage = true;
                 $scope.loading = false;
             });
     }
 
     $scope.clearTable = function () {
         $scope.distributions = undefined;
-        $scope.errorMessage = undefined;
+        $scope.showErrorMessage = false;
     }
 
     function roundNumber(number) {

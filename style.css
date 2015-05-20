@@ -45,6 +45,10 @@ body {
     margin: 15px;
 }
 
+.alert-danger{
+    margin: 15px;
+}
+
 .glyphicon-refresh-animate {
     -animation: spin .7s infinite linear;
     -webkit-animation: spin2 .7s infinite linear;
